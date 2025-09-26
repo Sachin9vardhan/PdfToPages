@@ -27,26 +27,32 @@ def convert_pdf():
     pdf_path = os.path.join(output_folder, f"{pdf_name}.pdf")
     pdf_file.save(pdf_path)
 
-    # Convert PDF pages to images
+    # Convert all PDF pages to images
     doc = fitz.open(pdf_path)
-    image_files = []
-    max_pages = 2  # Only process first 2 pages
+    all_image_files = []
     for i, page in enumerate(doc, start=1):
-        if i > max_pages:
-            break
         pix = page.get_pixmap(dpi=300)
         img_name = f"page_{i}.png"
         img_path = os.path.join(output_folder, img_name)
         pix.save(img_path)
-        image_files.append(url_for('static', filename=f'images/{session_id}/{img_name}'))
+        all_image_files.append(img_name)
     doc.close()
 
+    # Prepare preview: only first 2 pages
+    preview_images = all_image_files[:2]
+    preview_urls = [
+        url_for('static', filename=f'images/{session_id}/{img}') for img in preview_images
+    ]
 
     # Zip all images
     zip_path = os.path.join(output_folder, f"{pdf_name}_images.zip")
     with zipfile.ZipFile(zip_path, "w") as zipf:
-        for img in os.listdir(output_folder):
-            if img.endswith('.png'):
-                zipf.write(os.path.join(output_folder, img), img)
+        for img in all_image_files:  # include all pages
+            zipf.write(os.path.join(output_folder, img), img)
 
-    return render_template("preview.html", images=image_files, zip_file=url_for('static', filename=f'images/{session_id}/{pdf_name}_images.zip'))
+    return render_template(
+        "preview.html",
+        images=preview_urls,  # first 2 pages for preview
+        zip_file=url_for('static', filename=f'images/{session_id}/{pdf_name}_images.zip')  # all pages
+    )
+
