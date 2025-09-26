@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Preview PDF Pages</title>
+</head>
+<body>
+    <h1>Preview Converted PDF Pages</h1>
+    {% for img in images %}
+        <div>
+            <img src="{{ img }}" alt="Page" style="max-width:500px; margin:10px;"><br>
+        </div>
+    {% endfor %}
+    <br>
+    <a href="{{ zip_file }}" download>Download All Pages as ZIP</a>
+</body>
+</html>
