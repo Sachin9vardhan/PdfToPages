@@ -30,13 +30,17 @@ def convert_pdf():
     # Convert PDF pages to images
     doc = fitz.open(pdf_path)
     image_files = []
+    max_pages = 2  # Only process first 2 pages
     for i, page in enumerate(doc, start=1):
+        if i > max_pages:
+            break
         pix = page.get_pixmap(dpi=300)
         img_name = f"page_{i}.png"
         img_path = os.path.join(output_folder, img_name)
         pix.save(img_path)
         image_files.append(url_for('static', filename=f'images/{session_id}/{img_name}'))
     doc.close()
+
 
     # Zip all images
     zip_path = os.path.join(output_folder, f"{pdf_name}_images.zip")
